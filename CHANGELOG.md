@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-Windows 11 port of Slate (from the macOS fork at version 1.0.25 plus its 2026 refresh).
+Windows 11 port of Slate (from the macOS fork at version 2.0.1).
 
 - C# / .NET 10 tray application; self-contained single-file builds for x64 and ARM64.
 - Same `.slate` config format, read from `%USERPROFILE%\.slate`: `config`, `alias`, `layout`, `default`, `bind`, `source`.

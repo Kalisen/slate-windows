@@ -18,14 +18,17 @@ originally written for macOS. Your `.slate` config works on Windows, with a few 
 
 ## Credits
 
-Slate was created by [Jigish Patel](https://github.com/jigish/slate). Big thanks to [philc](https://github.com/philc) for
-the Window Hints idea (and initial implementation) as well as plenty of other suggestions and improvement ideas.
+Slate was originally written by [Jigish Patel](https://github.com/jigish) ([jigish/slate](https://github.com/jigish/slate)),
+with contributions from the Slate community. Big thanks to [philc](https://github.com/philc) for the Window Hints idea
+(and initial implementation) as well as plenty of other suggestions and improvement ideas.
+
+This Windows version is a port of the maintained macOS fork, [Kalisen/slate](https://github.com/Kalisen/slate).
 
 # Using Slate
 
 ## Installing Slate
 
-Requirements: Windows 11 (Windows 10 1809 or later should work), x64 or ARM64. The builds are self-contained: no .NET
+Requirements: Windows 11, x64 or ARM64. The builds are self-contained: no .NET
 runtime is needed.
 
 ### Download
@@ -64,10 +67,11 @@ administrator to manage those windows too.
 ## Configuring Slate
 
 Slate is configured using a `.slate` file in your user profile (`%USERPROFILE%\.slate`, e.g. `C:\Users\you\.slate`). If
-it does not exist, Slate offers to use the [default config](src/Slate.Core/Configuration/default.slate).
+it does not exist, or cannot be loaded because of the ownership rules below, Slate tells you why and, unless you quit,
+uses the [default config](src/Slate.Core/Configuration/default.slate).
 
 Slate asks you to approve your config whenever `.slate` or a file it `source`s changes. The dialog lists the files and
-every line that runs a `shell` command; approve only changes you made. If you don't approve, Slate runs without bindings
+every line that mentions `shell`, so that you can review the commands it runs; approve only changes you made. If you don't approve, Slate runs without bindings
 or layouts until the next relaunch. Approvals are stored in `%APPDATA%\Slate`, encrypted for your Windows account.
 
 Config files (`.slate` and any file it `source`s) must be owned by you (or an administrator or SYSTEM) and only you,
@@ -95,8 +99,8 @@ Configuration is split into the following directives:
 |:------|:--------|
 | `cmd` modifier | The Windows key. `win` is accepted too. |
 | `fn` modifier | Not available: Windows applications cannot see it. |
-| `~/.slate` | `%USERPROFILE%\.slate`; `~` expands to `%USERPROFILE%` everywhere. |
-| Application names (`'iTerm'`) | The program's description (as shown in Task Manager, e.g. `'Google Chrome'`) or its executable name (`'chrome'` or `'chrome.exe'`), case-insensitive. Use "Current Window Info" to see the names. |
+| `~/.slate` | `%USERPROFILE%\.slate`. A leading `~` expands to `%USERPROFILE%` in `source` paths, `shell` commands and the `shell` `path:` option. |
+| Application names (`'iTerm'`) | The program's description (as shown in Task Manager, e.g. `'Google Chrome'`) or its executable name (`'chrome'` or `'chrome.exe'`), case-insensitive. "Current Window Info" shows the description. |
 | `hide` / `show` | Minimize / restore every window of the application. |
 | `shell '/usr/bin/open'` | `shell 'C:\Windows\explorer.exe'`. Quote paths with spaces with double quotes: `shell '"C:\Program Files\App\app.exe" --flag'`. |
 | `keyboardLayout` config | Ignored: keys follow the active Windows keyboard layout. |
@@ -160,7 +164,7 @@ variables above, expressions can be used with the following functions and operat
     random     e.g. random() = 0.20607629744336009 (random float between 0 and 1)
     randomn    e.g. randomn(10) = 4 (random integer between 0 and parameter-1)
 
-**Note:** When using expressions spaces are *not* allowed!
+**Note:** Expressions must not contain spaces: in a `.slate` file, a space ends the parameter.
 
 ### The `config` Directive
 
@@ -172,7 +176,8 @@ Example:
 
     config defaultToCurrentScreen true
 
-A config can apply to one application only: `config snapshotTitleMatch:'Code' sequential`.
+`snapshotTitleMatch` can be set for one application only: `config snapshotTitleMatch:'Code' sequential`. Applications
+without their own value use the global one. Other configs accept this form but ignore the application-specific value.
 
 **Note:** the `.slate` file is read top-down: directives that come before `config` directives may not have the `config`
 applied. As such, it is best to put `config` directives at the top of your `.slate` file.
@@ -200,7 +205,7 @@ Allowed configs and their defaults:
 | `windowHintsBackgroundColor` | `50;53;58;0.9` | |
 | `windowHintsDuration` | `3` | Seconds before hints disappear |
 | `windowHintsRoundedCornerSize` | `5` | |
-| `windowHintsIgnoreHiddenWindows` | `true` | Skip windows whose hint would be covered by another window |
+| `windowHintsIgnoreHiddenWindows` | `true` | Only place a hint where it is not covered by another window, trying each `windowHintsTopLeftX`/`Y` candidate in turn; windows with no uncovered candidate get no hint |
 | `windowHintsTopLeftX` | `(windowSizeX/2)-(windowHintsWidth/2);0` | Semicolon separated candidate positions, relative to the window |
 | `windowHintsTopLeftY` | `(windowSizeY/2)-(windowHintsHeight/2);0` | |
 | `windowHintsOrder` | `leftToRight` | `none`, `persist` (a window keeps its hint), `leftToRight` or `rightToLeft` |
@@ -226,7 +231,7 @@ Allowed configs and their defaults:
 | `switchFontColor` | `255;255;255;1.0` | |
 | `switchFontName` | `Segoe UI` | |
 | `switchShowTitles` | `false` | |
-| `switchType` | `app` | |
+| `switchType` | `app` | Ignored on Windows |
 | `switchSelectedPadding` | `10` | |
 | `keyboardLayout` | `qwerty` | Ignored on Windows |
 | `snapshotTitleMatch` | `levenshtein` | How windows are matched to saved ones: `levenshtein` or `sequential` |
@@ -266,7 +271,8 @@ Where:
     name = the name you want to use to reference the layout
     'app name' = single-quoted name of the application to add to the layout **or** BEFORE or AFTER
     OPTIONS = a comma separated list of options for this application (cannot be used with BEFORE or AFTER)
-    operations = a pipe separated list of operations (move, resize, push, nudge, throw, or corner)
+    operations = a list of operations separated by " | " (a pipe with a space on each side), usually move,
+                 resize, push, nudge, throw or corner. BEFORE and AFTER take a single operation.
 
 Possible Options:
 
@@ -314,7 +320,9 @@ Will trigger `myLayout` anytime the screen configuration changes to have 2 monit
 
     default myLayout2 resolutions:1440x900;1024x768;1680x1050
 
-Will trigger `myLayout2` anytime the screen configuration changes to have exactly 3 monitors with resolutions `1440x900`, `1024x768`, and `1680x1050`.
+Will trigger `myLayout2` anytime the screen configuration changes to have exactly 3 monitors with resolutions `1440x900`, `1024x768`, and `1680x1050`, in any order.
+
+The first matching `default` wins. If both a layout and a snapshot have the name, the layout is used.
 
 ### The `bind` Directive
 
@@ -357,7 +365,10 @@ Some operations allow you to specify a screen. Here are the list of possible val
 * Integer representing the screen ID (indexed at 0). Screens are ordered from left to right (by X coordinate of the origin which is the top-left point). If `orderScreensLeftToRight` is set to false, the screen ID is the system ID (indexed at 0, the primary screen is 0). If `orderScreensLeftToRight` is set to false but you still want to reference screens in the default ordered mode, prefix the screen ID with `ordered:`.
 * Screen resolution in the format `WIDTHxHEIGHT` (e.g. `1440x900`)
 * Screen direction relative to the current screen (`left|right|up|above|down|below`)
-* `next` or `previous` (represents the `currentID+1` or `currentID-1` screen)
+* `next` or `previous` (or `prev`): the next or previous screen in system order, wrapping around
+
+If the referenced screen does not exist, the operation does nothing, unless `defaultToCurrentScreen` is true: then it
+uses the current screen.
 
 **Allowed operations are:**
 
@@ -391,12 +402,13 @@ Resize the window (keeping top-left the same): `resize x y anchor`
 
         bind right:ctrl resize +10% +0
 
-    Will bind the keystroke ctrl-rightarrow to increase the width the current window by `10%`.
+    Will bind the keystroke ctrl-rightarrow to increase the width of the current window by `10%` of the screen width
+    (of the window width if `resizePercentOf` is `windowSize`).
 
 ##### push
 Push the window to the edge of the screen: `push direction style screen`
 
-        direction = top|up|bottom|down|left|right
+        direction = top|up|above|bottom|down|below|left|right
         style = (optional) none|center|bar|bar-resize:expression (default is none)
         screen = (optional) the reference to the screen of the window's desired position.
                  If this is not specified, it will default to the screen the window is currently on.
@@ -423,7 +435,7 @@ Nudge the window in any direction: `nudge x y`
 ##### throw
 Throw the window to any screen's origin: `throw screen style`
 
-        screen = the screen you want to throw the window to (0 indexed)
+        screen = the screen you want to throw the window to (any screen reference, see above)
         style = (optional) resize|noresize|resize:x-expression;y-expression (default will not resize)
 
     Example:
@@ -504,7 +516,8 @@ Toggle one or more applications: `toggle applications`
 ##### chain
 Chain multiple operations to one binding: `chain opAndParams1 | opAndParams2 ...`
 
-        opAndParamsX = any operation string (except sequence, hint and grid)
+        opAndParamsX = an operation string, usually one that moves the window (sequence, hint and grid are not
+                       designed to be chained). Separate operations with " | " (a space on each side).
 
     Example:
 
@@ -515,8 +528,9 @@ Chain multiple operations to one binding: `chain opAndParams1 | opAndParams2 ...
 ##### sequence
 Activate a sequence of operations in one binding: `sequence opAndParams1 separator opAndParams 2 ...`
 
-        opAndParamsX = any of the above operation strings (except chain and grid. hint must be last if present)
-        separator = | or >. | will cause the next operation to be performed on the window focused at the time of
+        opAndParamsX = any of the above operation strings (chain and grid are not designed for sequences; put hint
+                       last if present)
+        separator = " | " or " > ", with a space on each side. | will cause the next operation to be performed on the window focused at the time of
                     execution of that operation, > will cause the next operation to be performed on the window
                     focused at the start of the > chain.
 
@@ -535,7 +549,7 @@ Activate a layout: `layout name`
 
         bind 1:ctrl layout myLayout
 
-    Will bind the keystroke ctrl-l to activate the layout called `myLayout`. Note that the layout **must** be created before you bind it.
+    Will bind the keystroke ctrl-1 to activate the layout called `myLayout`. Note that the layout **must** be created before you bind it.
 
 ##### focus
 Focus a window in a direction or from an application: `focus direction|app`
@@ -607,7 +621,7 @@ Show Window Hints (similar to Link Hints in Vimium except for Windows): `hint ch
 
         bind 1:ctrl hint QWERTYUIOP
 
-    Will bind the keystroke ctrl-1 to show Window Hints using the letters `Q`, `W`, `E`, `R`, `T`, `Y`, `U`, `I`, `O`, and `P`. This will show an overlay over every window on screen containing one of those letters. While the overlays are showing, if one of those letters is pressed, the corresponding window will be focused. If there are more than 10 windows, some windows will not get hints. Pressing ESC will dismiss the hints.
+    Will bind the keystroke ctrl-1 to show Window Hints using the letters `Q`, `W`, `E`, `R`, `T`, `Y`, `U`, `I`, `O`, and `P`. This will show an overlay over every window on screen containing one of those letters. While the overlays are showing, if one of those letters is pressed, the corresponding window will be focused. If there are more than 10 windows, some windows will not get hints. Minimized windows and windows without a title get no hint. Pressing ESC, or waiting `windowHintsDuration` seconds, dismisses the hints.
 
     **Note:** There are *tons* of config options to tweak this.
 
@@ -644,7 +658,7 @@ Undo an Operation: `undo`
 
         bind 1:ctrl undo
 
-    Will bind the keystroke ctrl-1 to undo the last binding that was triggered. By default you can undo up to the last 10 commands. This can be changed using the `undoMaxStackSize` config. Also, you can only undo movement-based operations. Focus-related operations will not undo.
+    Will bind the keystroke ctrl-1 to undo the last binding that was triggered. By default you can undo up to the last 10 commands. This can be changed using the `undoMaxStackSize` config. Only the operations listed in the `undoOps` config can be undone (by default the ones that move windows, plus `shell`); focus-related operations will not undo.
 
 ##### switch
 A Better Application Switcher: `switch options`
@@ -671,7 +685,7 @@ The source directive follows the following format (tokens may be separated by an
 
     source filename optional:if_exists
 
-Where `filename` is the name of a file containing any of the directives above (including source). If no absolute path is specified, the user's home directory will be prepended to `filename`. If the user specifies the option `if_exists` as the second argument, Slate will not complain if it cannot find the file.
+Where `filename` is the name of a file containing any of the directives above (including source). If no absolute path is specified, the user's home directory will be prepended to `filename`. If the user specifies the option `if_exists` as the second argument, Slate will not complain if it cannot find the file. A file that exists but breaks the ownership rules is still reported.
 
 For Example:
 
