@@ -106,6 +106,13 @@ Configuration is split into the following directives:
 Windows reserves a few shortcuts that no application can take over, such as Win+L and Ctrl+Alt+Del. Other Win+key
 shortcuts (e.g. Win+Arrow for Snap) are replaced while a binding uses them.
 
+#### Porting a macOS `.slate` file
+
+`cmd` maps to the Windows key by name, but on a PC keyboard the key next to the space bar is Alt, where `cmd` sits on a
+Mac. To keep the same finger positions as on macOS, swap the two modifiers: write `alt` where the Mac file says `cmd`,
+and `win` where it says `alt` (option). [examples/mac-keyboard-layout.slate](examples/mac-keyboard-layout.slate) is a
+complete configuration converted this way.
+
 ### Expressions
 
 Some directives allow parameters that can be expressions. The following strings will be replaced with the appropriate values when using expressions:

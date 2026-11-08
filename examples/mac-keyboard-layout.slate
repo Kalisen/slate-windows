@@ -1,0 +1,97 @@
+# Slate for Windows configuration, converted from a macOS ~/.slate.
+# Copy it to %USERPROFILE%\.slate to use it.
+#
+# Modifiers follow the PHYSICAL key positions of a Mac keyboard,
+# so the same fingers press the same keys as on macOS:
+#   Mac cmd    (next to the space bar)  -> Windows alt
+#   Mac option (one key further out)    -> Windows win
+#   ctrl and shift are unchanged.
+#
+# Note: while Slate runs, ctrl+win+left/right (virtual desktop switch)
+# and alt+esc are taken over by the bindings below.
+
+config defaultToCurrentScreen true
+config nudgePercentOf screenSize
+config resizePercentOf screenSize
+
+# HYPER KEYS
+# -------------------------------------------------------------------
+# The "hyper" key is a shortcut for CTRL + ALT + WIN
+
+alias hyper ctrl;alt;win
+
+# Resize Bindings (Mac: ctrl+option)
+bind right:ctrl;win  resize -10% +0 bottom-right
+bind left:ctrl;win   resize +10% +0 bottom-right
+bind up:ctrl;win     resize +0   +10% bottom-right
+bind down:ctrl;win   resize +0   -10% bottom-right
+
+# Push Bindings (Mac: ctrl+cmd)
+bind 1:ctrl;alt  push left bar-resize:screenSizeX/3
+bind 2:ctrl;alt  move screenOriginX+screenSizeX/3;screenOriginY screenSizeX/3;screenSizeY
+bind 3:ctrl;alt  push right bar-resize:screenSizeX/3
+bind right:ctrl;alt  push right bar-resize:screenSizeX/2
+bind left:ctrl;alt   push left  bar-resize:screenSizeX/2
+bind right:shift;ctrl;alt  push right bar-resize:screenSizeX/5
+bind up:ctrl;alt     move screenOriginX+screenSizeX/5;screenOriginY screenSizeX/5*3;screenSizeY
+bind left:shift;ctrl;alt   push left  bar-resize:screenSizeX/5
+bind down:ctrl;alt   move screenOriginX+screenSizeX/5*2;screenOriginY screenSizeX/5;screenSizeY
+bind up:shift;ctrl;alt   move screenOriginX+screenSizeX/3;screenOriginY screenSizeX/3;screenSizeY
+
+# Nudge Bindings (Mac: ctrl+cmd)
+bind pageUp:ctrl;alt nudge -20% +0
+bind pageDown:ctrl;alt nudge +20% +0
+
+# Throw Bindings
+bind right:${hyper} throw right resize
+bind left:${hyper}  throw left resize
+bind down:${hyper}  throw 0 resize
+
+# Window Hints (Mac: cmd+esc)
+bind esc:alt hint
+
+# Corners
+# -------------------------------------------------------------------
+# Key 7 = Top Left Corner
+alias topLeftCorner move screenOriginX;screenOriginY screenSizeX/5;screenSizeY/2
+bind pad7:${hyper} ${topLeftCorner}
+bind 7:${hyper} ${topLeftCorner}
+
+# Key y = Bottom Left Corner
+alias bottomLeftCorner move screenOriginX;screenOriginY+screenSizeY/2 screenSizeX/5;screenSizeY/2
+bind y:${hyper} ${bottomLeftCorner}
+
+# Key 8 = Top Middle Left
+alias topMiddleLeft move screenOriginX+screenSizeX/5;screenOriginY screenSizeX/5;screenSizeY/2
+bind pad8:${hyper} ${topMiddleLeft}
+bind 8:${hyper} ${topMiddleLeft}
+
+# Key u = Bottom Middle Left
+alias bottomMiddleLeft move screenOriginX+screenSizeX/5;screenOriginY+screenSizeY/2 screenSizeX/5;screenSizeY/2
+bind u:${hyper} ${bottomMiddleLeft}
+
+# Key 9 = Top Center
+alias topCenter move screenOriginX+screenSizeX/5*2;screenOriginY screenSizeX/5;screenSizeY/2
+bind pad9:${hyper} ${topCenter}
+bind 9:${hyper} ${topCenter}
+
+# Key i = Bottom Center
+alias bottomCenter move screenOriginX+screenSizeX/5*2;screenOriginY+screenSizeY/2 screenSizeX/5;screenSizeY/2
+bind i:${hyper} ${bottomCenter}
+
+# Key 0 = Top Middle Right
+alias topMiddleRight move screenOriginX+screenSizeX/5*3;screenOriginY screenSizeX/5;screenSizeY/2
+bind pad0:${hyper} ${topMiddleRight}
+bind 0:${hyper} ${topMiddleRight}
+
+# Key o = Bottom Middle Right
+alias bottomMiddleRight move screenOriginX+screenSizeX/5*3;screenOriginY+screenSizeY/2 screenSizeX/5;screenSizeY/2
+bind o:${hyper} ${bottomMiddleRight}
+
+# Key '-' = Top Right Corner
+alias topRightCorner move screenOriginX+screenSizeX/5*4;screenOriginY screenSizeX/5;screenSizeY/2
+bind -:${hyper} ${topRightCorner}
+
+# Key 'p' = Bottom Right Corner
+alias bottomRightCorner move screenOriginX+screenSizeX/5*4;screenOriginY+screenSizeY/2 screenSizeX/5;screenSizeY/2
+bind p:${hyper} ${bottomRightCorner}
