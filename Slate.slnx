@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Slate.App/Slate.App.csproj" />
+    <Project Path="src/Slate.Core/Slate.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Slate.App.IntegrationTests/Slate.App.IntegrationTests.csproj" />
+    <Project Path="tests/Slate.Core.Tests/Slate.Core.Tests.csproj" />
+  </Folder>
+</Solution>
