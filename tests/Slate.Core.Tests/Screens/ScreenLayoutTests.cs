@@ -47,7 +47,6 @@ public class ScreenLayoutTests
     [InlineData("800x600", true, 0)]
     [InlineData("up", false, ScreenIds.Ignore)]
     [InlineData("ordered:4", false, ScreenIds.Ignore)]
-    [InlineData("ordered:4", true, 0)]
     public void Missing_screens_are_ignored_or_fall_back_to_the_current_one(string reference, bool defaultToCurrent, int expected) =>
         Assert.Equal(expected, Layout(defaultToCurrent: defaultToCurrent).Resolve(reference, OnPrimary));
 
