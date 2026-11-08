@@ -107,4 +107,14 @@ public class SnapshotTests
         Assert.Equal("sequential", env.Settings.GetForApp(ConfigKeys.SnapshotTitleMatch, "Code"));
         Assert.Equal("levenshtein", env.Settings.GetForApp(ConfigKeys.SnapshotTitleMatch, "Other"));
     }
+
+    [Fact]
+    public void Applications_without_their_own_title_matching_use_the_global_value()
+    {
+        var env = new TestEnvironment();
+        env.Settings.Set(ConfigKeys.SnapshotTitleMatch, "sequential");
+        env.Settings.SetForApp(ConfigKeys.NudgePercentOf, "Code", "windowSize");
+        Assert.Equal("sequential", env.Settings.GetForApp(ConfigKeys.SnapshotTitleMatch, "Code"));
+        Assert.Equal("sequential", env.Settings.GetForApp(ConfigKeys.SnapshotTitleMatch, "Other"));
+    }
 }

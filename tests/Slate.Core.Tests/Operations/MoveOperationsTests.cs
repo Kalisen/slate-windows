@@ -35,14 +35,17 @@ public class MoveOperationsTests
     [InlineData("push bottom center", 560, 440, 800, 600)]
     [InlineData("push down bar", 0, 440, 1920, 600)]
     [InlineData("push down bar-resize:screenSizeY/4", 0, 780, 1920, 260)]
+    [InlineData("push down bar-resize:screenSizeY/2-20", 0, 540, 1920, 500)]
     [InlineData("push left", 0, 100, 800, 600)]
     [InlineData("push left center", 0, 220, 800, 600)]
     [InlineData("push left bar", 0, 0, 800, 1040)]
     [InlineData("push left bar-resize:screenSizeX/3", 0, 0, 640, 1040)]
+    [InlineData("push left bar-resize:min({screenSizeX/2,800})", 0, 0, 800, 1040)]
     [InlineData("push right", 1120, 100, 800, 600)]
     [InlineData("push right center", 1120, 220, 800, 600)]
     [InlineData("push right bar", 1120, 0, 800, 1040)]
     [InlineData("push right bar-resize:screenSizeX/3", 1280, 0, 640, 1040)]
+    [InlineData("push right bar-resize:screenSizeX/2+20", 940, 0, 980, 1040)]
     [InlineData("push right none 1", 2400, 100, 800, 600)]
     public void Push(string operation, double x, double y, double w, double h) =>
         Assert.Equal(new Rect(x, y, w, h), Run(operation));
@@ -52,6 +55,9 @@ public class MoveOperationsTests
     [InlineData("corner top-right", 1120, 0, 800, 600)]
     [InlineData("corner bottom-left", 0, 440, 800, 600)]
     [InlineData("corner bottom-right resize:screenSizeX/2;screenSizeY/2", 960, 520, 960, 520)]
+    [InlineData("corner bottom-right resize:screenSizeX/2-20;screenSizeY/2+20", 980, 500, 940, 540)]
+    [InlineData("corner top-right resize:screenSizeX/2-20;screenSizeY", 980, 0, 940, 1040)]
+    [InlineData("corner bottom-left resize:screenSizeX;screenSizeY/2-20", 0, 540, 1920, 500)]
     [InlineData("corner top-left resize:screenSizeX/2;screenSizeY/2 1", 1920, 0, 640, 512)]
     public void Corner(string operation, double x, double y, double w, double h) =>
         Assert.Equal(new Rect(x, y, w, h), Run(operation));
