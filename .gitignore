@@ -1,0 +1,12 @@
+bin/
+obj/
+artifacts/
+publish/
+TestResults/
+*.user
+*.suo
+.vs/
+.idea/
+
+# git worktrees for parallel feature/fix work
+.worktrees/
