@@ -1,0 +1,41 @@
+name: Release
+
+# Pushing a tag vX.Y.Z publishes self-contained builds for x64 and ARM64 to GitHub Releases.
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Test
+        run: dotnet test tests/Slate.Core.Tests/Slate.Core.Tests.csproj -c Release
+
+      - name: Publish
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          foreach ($rid in 'win-x64', 'win-arm64') {
+            dotnet publish src/Slate.App/Slate.App.csproj -c Release -r $rid --self-contained true `
+              -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true `
+              -p:DebugType=none -p:Version=$version -o "artifacts/$rid"
+            Compress-Archive -Path "artifacts/$rid/Slate.exe", README.md, LICENSE, CHANGELOG.md `
+              -DestinationPath "artifacts/Slate-$version-$rid.zip"
+          }
+
+      - name: Create release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" (Get-ChildItem artifacts/*.zip).FullName --title "Slate ${{ github.ref_name }}" --generate-notes
